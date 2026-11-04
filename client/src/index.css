@@ -1,0 +1,192 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme {
+  /* Global Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* Global Border Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+
+  /* --- Base & Backgrounds --- */
+  --color-paper: #fbf7f0; /* البطاقات واللوحات */
+  --color-cream: #f4ece1; /* خلفية الصفحة */
+  --color-field: #fffdf9; /* خلفية الحقول */
+
+  /* --- Text & Typography --- */
+  --color-soil: #4a2a17; /* النص الأساسي، الزر الرئيسي */
+  --color-soil-deep: #3b2112; /* قسم «كيف تطلب؟» والنص على الذهبي */
+  --color-muted: #6b5443; /* نص ثانوي وتسميات */
+
+  /* --- Borders & Dividers --- */
+  --color-border: #e4d7c5; /* حدود البطاقات والفواصل */
+  --color-border-strong: #d9c9b3; /* حدود الحقول والأزرار الثانوية */
+
+  /* --- Accents & Actions --- */
+  --color-leaf: #2f6b24; /* تأكيد، رابط أخضر، زر الحفظ */
+  --color-leaf-tint: #e5efd9; /* شارات القسم والتوفر */
+  --color-whatsapp: #0e7a3c; /* كل أزرار الطلب عبر واتساب */
+  --color-whatsapp-hover: #0a6432; /* تمرير زر واتساب */
+  --color-wheat: #e0a21b; /* شارة السلة وأرقام الخطوات */
+  --color-wheat-tint: #f6e3b3; /* شارة تعريفية في الواجهة */
+  --color-danger: #8a2f0f; /* حذف وأخطاء الحقول */
+  --color-danger-tint: #f3e3d6;
+
+  /* --- Product Tile Backgrounds --- */
+  --color-tile-1: #dce8cc;
+  --color-tile-2: #f1ddb0;
+  --color-tile-3: #e3d0bc;
+  --color-tile-4: #dde5d0;
+  --color-tile-5: #d6e4e0;
+  --color-tile-6: #e8d7d0;
+  --color-tile-7: #d2dee6;
+  --color-tile-8: #f0e2be;
+  --color-tile-9: #dfdcd3;
+  --color-tile-10: #e5d8e3;
+
+  /* Light Theme Shadows */
+  --shadow-card:
+    0 1px 2px rgba(15, 31, 29, 0.06), 0 4px 12px rgba(15, 31, 29, 0.05);
+  --shadow-pop: 0 8px 24px rgba(15, 31, 29, 0.14);
+}
+
+* {
+  box-sizing: border-box;
+  font-family: "Cairo", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-variation-settings: "slnt" 0;
+  transition: 0.3s;
+}
+
+body {
+  @apply overflow-x-hidden bg-cream;
+}
+
+.display {
+  @apply text-[48px] font-bold leading-14 tracking-[-0.01em];
+}
+
+h1 {
+  @apply text-[32px] font-bold leading-9;
+}
+
+h2 {
+  @apply text-[28px] font-bold leading-7.5;
+}
+
+h3 {
+  @apply text-[24px] font-bold leading-6.5;
+}
+
+.body {
+  @apply text-[16px] leading-6 font-normal;
+}
+
+.body-sm {
+  @apply text-[14px] leading-5 font-normal;
+}
+
+.label {
+  @apply text-[14px] leading-5 font-medium;
+}
+
+.label-lg {
+  @apply text-[15px] leading-5 font-bold;
+}
+
+.caption {
+  @apply text-[12px] leading-4 font-medium;
+}
+
+.price {
+  @apply text-[20px] leading-6 font-bold;
+}
+
+.price-lg {
+  @apply text-[28px] leading-8 font-bold;
+}
+
+.control-sm {
+  @apply h-8;
+}
+
+.control-md {
+  @apply h-11;
+}
+
+.control-lg {
+  @apply h-13;
+}
+
+.container {
+  @apply max-w-7xl mx-auto  px-4 sm:px-6 lg:px-8;
+}
+
+.radius-sm {
+  border-radius: 6px;
+}
+
+.radius-md {
+  border-radius: 10px;
+}
+
+.radius-lg {
+  border-radius: 16px;
+}
+
+.radius-pill {
+  border-radius: 999px;
+}
+
+@layer utilities {
+  /* Growing Stem Animation */
+  .animate-grow-stem {
+    animation: growStem 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite forwards;
+  }
+
+  /* Left Leaf Animation (with 0.5s delay) */
+  .animate-bloom-left {
+    animation: bloomLeaves 2.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s infinite
+      forwards;
+  }
+
+  /* Right Leaf Animation (with 0.8s delay) */
+  .animate-bloom-right {
+    animation: bloomLeaves 2.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.8s infinite
+      forwards;
+  }
+
+  /* Keyframe Animations */
+  @keyframes growStem {
+    0% {
+      stroke-dashoffset: 60;
+    }
+    40%,
+    100% {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes bloomLeaves {
+    0%,
+    20% {
+      transform: scale(0);
+    }
+    60%,
+    100% {
+      transform: scale(1);
+    }
+  }
+}
