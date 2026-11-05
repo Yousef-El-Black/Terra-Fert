@@ -14,6 +14,7 @@ import AdminLayout from "./admin/components/Layout";
 import AddProduct from "./admin/Pages/AddProduct";
 import Dashboard from "./admin/Pages/Dashboard";
 import ProductsManagement from "./admin/Pages/ProductsManagement";
+import EditProduct from "./admin/Pages/EditProduct";
 
 const router = createBrowserRouter([
   {
@@ -35,6 +36,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Dashboard /> },
       { path: "products/add", element: <AddProduct /> },
+      { path: "products/edit/:id", element: <EditProduct /> },
       { path: "products", element: <ProductsManagement /> },
     ],
   },

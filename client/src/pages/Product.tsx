@@ -1,26 +1,69 @@
 import { Link, useLocation } from "react-router-dom";
-import { products } from "../data/DemoDB";
 import NotFound from "./NotFound";
 import PlantIcon from "@mui/icons-material/Grass";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AvailableBadge } from "../components/Badges";
 import { AddToCartBtn, WhatsappOrderBtn } from "../components/Btns";
 import { useDispatch, useSelector } from "react-redux";
 import { addProduct, updateQuantity } from "../redux/slices/cartSlice";
 import ChatIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
 import { ProductCard } from "../components/Cards";
+import axios from "axios";
+import { addMsg } from "../redux/slices/msgSlice";
+
+type ProductData = {
+  _id: string;
+  category: string;
+  title: string;
+  description: string;
+  images: string[];
+  unit: string;
+};
 
 const Product = () => {
   const dispatch = useDispatch();
   const location = useLocation();
+  const serverUrl = import.meta.env.REACT_APP_SERVER_URL;
 
   const [activeImg, setActiveImg] = useState<number>(0);
   const [amount, setAmount] = useState<number>(1);
+  const [product, setProduct] = useState<ProductData | null>(null);
+  const [products, setProducts] = useState<ProductData[]>([]);
+
+  const getProduct = async () => {
+    try {
+      await axios
+        .get(`${serverUrl}/api/products/${productId}`)
+        .then((res) => {
+          setProduct(res.data);
+        })
+        .catch(() => {
+          const date = Date.now();
+          dispatch(addMsg({ id: date, text: "خطأ بالسيرفر", type: "error" }));
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getProducts = async () => {
+    try {
+      await axios
+        .get(`${serverUrl}/api/products/`)
+        .then((res) => {
+          setProducts(res.data);
+        })
+        .catch(() => {
+          const date = Date.now();
+          dispatch(addMsg({ id: date, text: "خطأ بالسيرفر", type: "error" }));
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const productId =
     location.pathname.split("/")[location.pathname.split("/").length - 1];
-
-  const product = products.filter((p) => p.id === productId)[0];
 
   const cart = useSelector(
     (state: { cart: { value: { id: string; quantity: number }[] } }) =>
@@ -40,14 +83,19 @@ const Product = () => {
   };
 
   const addToCart = () => {
-    console.log(cart.filter((item) => item.id === productId).length > 0);
+    if (!product) return;
 
     if (cart.filter((item) => item.id === productId).length > 0) {
-      dispatch(updateQuantity({ id: product.id, quantity: amount }));
+      dispatch(updateQuantity({ id: product._id, quantity: amount }));
     } else {
-      dispatch(addProduct({ id: product.id, quantity: amount }));
+      dispatch(addProduct({ id: product._id, quantity: amount }));
     }
   };
+
+  useEffect(() => {
+    getProduct();
+    getProducts();
+  }, []);
 
   if (!product) {
     return <NotFound />;
@@ -72,7 +120,7 @@ const Product = () => {
             <div className="main-image w-full flex justify-center items-center flex-col gap-4 bg-tile-1 rounded-lg aspect-square overflow-hidden">
               {product.images ? (
                 <img
-                  src={product.images[activeImg]}
+                  src={serverUrl + product.images[activeImg]}
                   alt={product.title + " Image"}
                   className="h-full aspect-square"
                 />
@@ -102,7 +150,11 @@ const Product = () => {
                     }}
                     onClick={() => handleChangeImage(index)}
                   >
-                    <img src={img} alt={product.title + "Image-" + index} />
+                    <img
+                      src={serverUrl + img}
+                      alt={product.title + "Image-" + index}
+                      className="bg-cover w-full h-full"
+                    />
                   </div>
                 );
               })}
@@ -170,7 +222,7 @@ const Product = () => {
           <h2 className="text-center lg:text-start text-soil">منتجات مشابهة</h2>
           <div className="products-container grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 py-5">
             {products.slice(0, 6).map((product) => (
-              <ProductCard key={product.id} id={product.id} />
+              <ProductCard key={product._id} id={product._id} />
             ))}
           </div>
         </div>

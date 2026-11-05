@@ -1,19 +1,31 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SearchInput } from "../components/Inputs";
 import { CategoryTag } from "../components/Tags";
 import { ProductCard } from "../components/Cards";
-import { products } from "../data/DemoDB";
 import { useSearchParams } from "react-router-dom";
+import axios from "axios";
+
+interface Product {
+  _id: string | number;
+  title: string;
+  category: string;
+}
 
 const Products = () => {
+  const serverUrl = import.meta.env.REACT_APP_SERVER_URL;
   const [params, setParams] = useSearchParams({ cat: "all", page: "1" });
   const activeTag = params.get("cat") || "all";
   const [search, setSearch] = useState<string>("");
-  const [activePage, setActivePage] = useState<string>("1");
+  const [activePage, setActivePage] = useState<string>(
+    params.get("page") || "1",
+  );
+  const [products, setProducts] = useState<Product[]>([]);
+  const [productsCounter, setProductsCounter] = useState(0);
   const searchTerm = search.trim().toLocaleLowerCase();
 
+  const maxItems = 18;
+
   // FIXME: Change it With The Server Data & I will Send The Active Page to Get The new Products
-  const productsCounter = 40;
 
   const handleChangeCat = (cat: string) => {
     setParams({ cat });
@@ -24,7 +36,7 @@ const Products = () => {
   };
 
   const handleNextPage = () => {
-    if (Math.ceil(productsCounter / 18) > +activePage) {
+    if (Math.ceil(productsCounter / maxItems) > +activePage) {
       setActivePage(String(+activePage + 1));
       setParams({ cat: activeTag, page: String(+activePage + 1) });
     }
@@ -36,6 +48,21 @@ const Products = () => {
       setParams({ cat: activeTag, page: String(+activePage - 1) });
     }
   };
+
+  const getProducts = async () => {
+    try {
+      await axios.get(`${serverUrl}/api/products/`).then((res) => {
+        setProducts(res.data);
+        setProductsCounter(res.data.length);
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getProducts();
+  }, []);
 
   return (
     <section>
@@ -145,8 +172,9 @@ const Products = () => {
                 .filter((item) =>
                   item.title.toLocaleLowerCase().includes(searchTerm),
                 )
+                .slice((+activePage - 1) * maxItems, +activePage * maxItems)
                 .map((product) => (
-                  <ProductCard key={product.id} id={product.id} />
+                  <ProductCard key={product._id} id={product._id} />
                 ))
             )
           ) : params.get("cat") !== "all" ? (
@@ -158,8 +186,9 @@ const Products = () => {
             ) : (
               products
                 .filter((item) => item.category === params.get("cat"))
+                .slice((+activePage - 1) * maxItems, +activePage * maxItems)
                 .map((product) => (
-                  <ProductCard key={product.id} id={product.id} />
+                  <ProductCard key={product._id} id={product._id} />
                 ))
             )
           ) : products.length == 0 ? (
@@ -167,9 +196,11 @@ const Products = () => {
               لا توجد منتجات حتى الان
             </div>
           ) : (
-            products.map((product) => (
-              <ProductCard key={product.id} id={product.id} />
-            ))
+            products
+              .slice((+activePage - 1) * maxItems, +activePage * maxItems)
+              .map((product) => (
+                <ProductCard key={product._id} id={product._id} />
+              ))
           )}
         </div>
         <div className="change-page-controls flex gap-3 flex-wrap justify-center items-centers">
@@ -179,19 +210,22 @@ const Products = () => {
           >
             الصفحة السابقة
           </button>
-          {Array.from({ length: Math.ceil(productsCounter / 18) }, (_, i) => (
-            <div
-              key={i + 1}
-              className="px-4 py-3 cursor-pointer hover:bg-paper hover:text-soil-deep text-soil rounded-lg w-fit shadow flex justify-center items-center bg-field"
-              onClick={() => {
-                const page = String(i + 1);
-                setActivePage(page);
-                setParams({ cat: activeTag, page });
-              }}
-            >
-              {i + 1}
-            </div>
-          ))}
+          {Array.from(
+            { length: Math.ceil(productsCounter / maxItems) },
+            (_, i) => (
+              <div
+                key={i + 1}
+                className="px-4 py-3 cursor-pointer hover:bg-paper hover:text-soil-deep text-soil rounded-lg w-fit shadow flex justify-center items-center bg-field"
+                onClick={() => {
+                  const page = String(i + 1);
+                  setActivePage(page);
+                  setParams({ cat: activeTag, page });
+                }}
+              >
+                {i + 1}
+              </div>
+            ),
+          )}
           <button
             className="next select-none px-3 py-3 cursor-pointer hover:bg-paper hover:text-soil-deep text-soil rounded-lg w-fit shadow flex justify-center items-center bg-field"
             onClick={handleNextPage}

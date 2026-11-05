@@ -5,16 +5,22 @@ import { AvailableBadge } from "../../components/Badges";
 import { AddToCartBtn, WhatsappOrderBtn } from "../../components/Btns";
 import ChatIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
 import PlantIcon from "@mui/icons-material/Grass";
-
 import PreviewIcon from "@mui/icons-material/RemoveRedEye";
 import { AddedProductCard } from "../../components/Cards";
+import axios from "axios";
+import { useDispatch } from "react-redux";
+import { addMsg } from "../../redux/slices/msgSlice";
+
 const AddProduct = () => {
+  const dispatch = useDispatch();
+  const serverUrl = import.meta.env.REACT_APP_SERVER_URL;
   const [status, setStatus] = useState<boolean>(true);
   const [title, setTitle] = useState<string>("");
   const [category, setCategory] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [unit, setUnit] = useState<string>("");
   const [images, setImages] = useState<File[]>([]);
+  const [enableRedBorder, setEnableRedBorder] = useState<boolean>(false);
 
   const addImagetoList = (img: File) => {
     setImages((prev) => [...prev, img]);
@@ -31,6 +37,72 @@ const AddProduct = () => {
     setDescription("");
     setUnit("");
     setStatus(true);
+  };
+
+  const validateInputs = () => {
+    setEnableRedBorder(true);
+    if (title && category && unit && status) {
+      return true;
+    } else {
+      const date = Date.now();
+      dispatch(
+        addMsg({
+          id: date,
+          text: "برجاء اكمال الحقول المطلوبة",
+          type: "error",
+        }),
+      );
+      return false;
+    }
+  };
+
+  const handleUploadImages = async () => {
+    const uploadedImages = await Promise.all(
+      images.map((img) => {
+        const formData = new FormData();
+        formData.append("image_input", img);
+        return axios
+          .post<{
+            fileInfo: { path: string };
+          }>(`${serverUrl}/api/upload/`, formData)
+          .then((res) => res.data.fileInfo.path);
+      }),
+    );
+    return uploadedImages;
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const uploadedImages = await handleUploadImages();
+      await axios
+        .post(`${serverUrl}/api/products/`, {
+          description,
+          images: uploadedImages,
+          title,
+          category,
+          status: status ? "متوفر" : "غير متوفر",
+          unit,
+          rating: [],
+        })
+        .then((res) => {
+          const date = Date.now();
+          dispatch(
+            addMsg({
+              id: date,
+              text: `تم اضافة "${res.data.title}" بنجاح`,
+              type: "success",
+            }),
+          );
+        })
+        .then(() => {
+          document.location.assign("/admin/products/");
+        })
+        .catch((err) => {
+          console.error("Failed to create product:", err.response?.data ?? err);
+        });
+    } catch (error) {
+      console.error("Failed to upload product images:", error);
+    }
   };
 
   return (
@@ -103,6 +175,13 @@ const AddProduct = () => {
                   id="ptitle"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
+                  style={{
+                    outlineColor:
+                      enableRedBorder && !title ? "#ff0000" : "transparent",
+                    outlineWidth: "4px",
+                    outlineStyle:
+                      enableRedBorder && !title ? "auto" : undefined,
+                  }}
                 />
               </div>
               <div className="category flex-col flex gap-3 py-3">
@@ -116,6 +195,13 @@ const AddProduct = () => {
                   value={category}
                   defaultValue={""}
                   onChange={(e) => setCategory(e.target.value)}
+                  style={{
+                    outlineColor:
+                      enableRedBorder && !category ? "#ff0000" : "transparent",
+                    outlineWidth: "4px",
+                    outlineStyle:
+                      enableRedBorder && !category ? "auto" : undefined,
+                  }}
                 >
                   <option value="" disabled>
                     اختر القسم
@@ -143,6 +229,12 @@ const AddProduct = () => {
                   value={unit}
                   defaultValue={""}
                   onChange={(e) => setUnit(e.target.value)}
+                  style={{
+                    outlineColor:
+                      enableRedBorder && !unit ? "#ff0000" : "transparent",
+                    outlineWidth: "4px",
+                    outlineStyle: enableRedBorder && !unit ? "auto" : undefined,
+                  }}
                 >
                   <option value="" disabled>
                     اختر الوحدة
@@ -194,7 +286,15 @@ const AddProduct = () => {
               </div>
               <div className="submit flex items-center gap-5">
                 {/* FIXME: Handle Save Product Btn */}
-                <button className="flex-3 border-border border-2 px-5 py-3 rounded-lg font-bold cursor-pointer bg-leaf text-leaf-tint">
+                <button
+                  className="flex-3 border-border border-2 px-5 py-3 rounded-lg font-bold cursor-pointer bg-leaf text-leaf-tint"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (validateInputs()) {
+                      handleSubmit();
+                    }
+                  }}
+                >
                   حفظ المنتج
                 </button>
                 <button
