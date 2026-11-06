@@ -177,6 +177,7 @@ Server TypeScript build:
 ```powershell
 cd server
 npm run build
+npm start
 ```
 
 The server package currently has no automated test suite configured; its
