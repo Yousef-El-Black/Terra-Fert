@@ -7,9 +7,11 @@ import { useState } from "react";
 import Menu from "./Menu";
 import NavBar from "./NavBar";
 import { useSelector } from "react-redux";
+import { useWhatsAppSettings } from "./useWhatsAppSettings";
 
 const Header = () => {
   const [isMenu, setIsMenu] = useState<boolean>(false);
+  const { whatsappLink } = useWhatsAppSettings();
   const cartCounter = useSelector(
     (state: { cart: { value: unknown[] } }) => state.cart.value.length,
   );
@@ -82,7 +84,7 @@ const Header = () => {
           </div>
           <WhatsappBtn
             text="واتساب"
-            link="/"
+            link={whatsappLink}
             icon={<ChatIcon fontSize="small" />}
           />
         </div>

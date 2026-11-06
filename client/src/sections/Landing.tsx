@@ -1,8 +1,11 @@
 import { YellowBadge } from "../components/Badges";
 import { PrimaryBtn, WhatsappBtn } from "../components/Btns";
 import ChatIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
+import { useWhatsAppSettings } from "../components/useWhatsAppSettings";
 
 const Landing = () => {
+  const { whatsappLink } = useWhatsAppSettings();
+
   return (
     <section>
       <div className="container lg:h-[calc(100vh-180px)] flex flex-col lg:flex-row justify-center items-center gap-5">
@@ -20,7 +23,7 @@ const Landing = () => {
             <PrimaryBtn text="تصفح المنتجات" link="/products" />
             <WhatsappBtn
               text="اطلب عبر الواتساب"
-              link="/"
+              link={whatsappLink}
               icon={<ChatIcon />}
             />
           </div>

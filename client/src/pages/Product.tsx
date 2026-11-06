@@ -1,8 +1,8 @@
 import { Link, useLocation } from "react-router-dom";
 import NotFound from "./NotFound";
 import PlantIcon from "@mui/icons-material/Grass";
-import { useEffect, useState } from "react";
-import { AvailableBadge } from "../components/Badges";
+import { useCallback, useEffect, useState } from "react";
+import { AvailableBadge, UnavailableBadge } from "../components/Badges";
 import { AddToCartBtn, WhatsappOrderBtn } from "../components/Btns";
 import { useDispatch, useSelector } from "react-redux";
 import { addProduct, updateQuantity } from "../redux/slices/cartSlice";
@@ -10,6 +10,7 @@ import ChatIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
 import { ProductCard } from "../components/Cards";
 import axios from "axios";
 import { addMsg } from "../redux/slices/msgSlice";
+import { useWhatsAppSettings } from "../components/useWhatsAppSettings";
 
 type ProductData = {
   _id: string;
@@ -18,19 +19,23 @@ type ProductData = {
   description: string;
   images: string[];
   unit: string;
+  status: string;
 };
 
 const Product = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const serverUrl = import.meta.env.REACT_APP_SERVER_URL;
+  const { whatsappLink } = useWhatsAppSettings();
 
   const [activeImg, setActiveImg] = useState<number>(0);
   const [amount, setAmount] = useState<number>(1);
   const [product, setProduct] = useState<ProductData | null>(null);
   const [products, setProducts] = useState<ProductData[]>([]);
+  const productId =
+    location.pathname.split("/")[location.pathname.split("/").length - 1];
 
-  const getProduct = async () => {
+  const getProduct = useCallback(async () => {
     try {
       await axios
         .get(`${serverUrl}/api/products/${productId}`)
@@ -44,9 +49,9 @@ const Product = () => {
     } catch (error) {
       console.log(error);
     }
-  };
+  }, [dispatch, productId, serverUrl]);
 
-  const getProducts = async () => {
+  const getProducts = useCallback(async () => {
     try {
       await axios
         .get(`${serverUrl}/api/products/`)
@@ -60,10 +65,7 @@ const Product = () => {
     } catch (error) {
       console.log(error);
     }
-  };
-
-  const productId =
-    location.pathname.split("/")[location.pathname.split("/").length - 1];
+  }, [dispatch, serverUrl]);
 
   const cart = useSelector(
     (state: { cart: { value: { id: string; quantity: number }[] } }) =>
@@ -93,9 +95,9 @@ const Product = () => {
   };
 
   useEffect(() => {
-    getProduct();
-    getProducts();
-  }, []);
+    void getProduct();
+    void getProducts();
+  }, [getProduct, getProducts]);
 
   if (!product) {
     return <NotFound />;
@@ -162,7 +164,11 @@ const Product = () => {
           </div>
           <div className="text flex-1 flex-col gap-5 flex">
             <div className="tag py-3 flex justify-center lg:justify-start items-center">
-              <AvailableBadge text={product.category} />
+              {product.status === "متوفر" ? (
+                <AvailableBadge text="متوفر" />
+              ) : (
+                <UnavailableBadge text="غير متوفر" />
+              )}
             </div>
             <h2 className="title display text-soil py-3 text-center lg:text-start">
               {product.title}
@@ -195,12 +201,21 @@ const Product = () => {
               </div>
             </div>
             <div className="btns flex-col gap-4 flex">
-              <WhatsappOrderBtn
-                text="اطلب الآن عبر الواتساب"
-                link="/"
-                icon={<ChatIcon fontSize="small" />}
-              />
-              <AddToCartBtn text="أضف الى السلة" onClick={addToCart} />
+              {product.status === "متوفر" ? (
+                <>
+                  <WhatsappOrderBtn
+                    text="اطلب الآن عبر الواتساب"
+                    link={whatsappLink}
+                    icon={<ChatIcon fontSize="small" />}
+                    message={`السلام عليكم، أرغب في طلب:\n${product.title}\nالكمية: ${amount}`}
+                  />
+                  <AddToCartBtn text="أضف الى السلة" onClick={addToCart} />
+                </>
+              ) : (
+                <p className="text-center text-danger" role="status">
+                  هذا المنتج غير متوفر حالياً
+                </p>
+              )}
             </div>
             <ul className="details">
               <li className="flex gap-5 border-b-2 border-border-strong py-4">

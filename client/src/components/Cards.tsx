@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AvailableBadge, UnavailableBadge } from "./Badges";
 import PlantIcon from "@mui/icons-material/Grass";
 import { WhatsappOrderBtn, AddToCartBtn } from "./Btns";
@@ -15,17 +15,21 @@ import PreviewIcon from "@mui/icons-material/RemoveRedEye";
 import PopUp from "../admin/components/PopUp";
 import axios from "axios";
 import { addMsg } from "../redux/slices/msgSlice";
+import { getAdminAuthConfig } from "../admin/utils/adminAuth";
+import { useWhatsAppSettings } from "./useWhatsAppSettings";
 
 export const ProductCard = ({ id }: { id: string | number }) => {
+  const { whatsappLink } = useWhatsAppSettings();
   const [product, setProduct] = useState({
     images: [],
     category: "",
     title: "",
     description: "",
+    status: "",
   });
   const serverUrl = import.meta.env.REACT_APP_SERVER_URL;
   const dispatch = useDispatch();
-  const getProduct = async () => {
+  const getProduct = useCallback(async () => {
     try {
       await axios.get(`${serverUrl}/api/products/${id}`).then((res) => {
         setProduct(res.data);
@@ -33,11 +37,11 @@ export const ProductCard = ({ id }: { id: string | number }) => {
     } catch (error) {
       console.log(error);
     }
-  };
+  }, [id, serverUrl]);
 
   useEffect(() => {
-    getProduct();
-  }, []);
+    void getProduct();
+  }, [getProduct]);
 
   if (!product) return null;
 
@@ -99,12 +103,19 @@ export const ProductCard = ({ id }: { id: string | number }) => {
         <h4 className="text-xl font-bold py-2">{product.title}</h4>
         <p className="body text-muted py-2">{product.description}</p>
         <div className="btns py-3 flex flex-col items-center justify-center gap-2">
-          <AddToCartBtn text="اضف الى السلة" onClick={addToCart} />
-          <WhatsappOrderBtn
-            text="اطلب عبر الواتساب"
-            link="https://wa.me/1234567890"
-            icon={<ChatIcon fontSize="small" />}
-          />
+          {product.status === "متوفر" ? (
+            <>
+              <AddToCartBtn text="اضف الى السلة" onClick={addToCart} />
+              <WhatsappOrderBtn
+                text="اطلب عبر الواتساب"
+                link={whatsappLink}
+                icon={<ChatIcon fontSize="small" />}
+                message={`السلام عليكم، أرغب في طلب:\n${product.title}\nالكمية: 1`}
+              />
+            </>
+          ) : product.status === "غير متوفر" ? (
+            <UnavailableBadge text="غير متوفر حالياً" />
+          ) : null}
         </div>
       </div>
     </div>
@@ -127,6 +138,7 @@ export const CartCard = ({
     images: string[];
     category: string;
     title: string;
+    status: string;
   } | null>(null);
 
   if (quantity !== previousQuantity) {
@@ -150,7 +162,7 @@ export const CartCard = ({
     dispatch(deleteProduct(id));
   };
 
-  const getProduct = async () => {
+  const getProduct = useCallback(async () => {
     try {
       await axios.get(`${serverUrl}/api/products/${id}`).then((res) => {
         setProduct(res.data);
@@ -158,15 +170,15 @@ export const CartCard = ({
     } catch (error) {
       console.log(error);
     }
-  };
+  }, [id, serverUrl]);
 
   useEffect(() => {
-    getProduct();
-  }, []);
+    void getProduct();
+  }, [getProduct]);
 
   if (!product) return null;
 
-  const { images, category, title } = product;
+  const { images, category, title, status } = product;
 
   return (
     <div className="cart-card flex flex-col md:flex-row justify-between items-center gap-4 border-2 border-border rounded-lg bg-paper p-3 text-soil">
@@ -212,6 +224,11 @@ export const CartCard = ({
         <div className="text flex flex-col gap-2">
           <h3 className="title font-bold">{title}</h3>
           <span className="body-sm lg:label text-muted">{category}</span>
+          {status !== "متوفر" && (
+            <span className="body-sm text-danger" role="status">
+              غير متوفر حالياً
+            </span>
+          )}
         </div>
       </div>
       <div className="btns flex gap-3 items-center">
@@ -267,7 +284,7 @@ export const AddedProductCard = ({
   const deleteProduct = async (id: string | number) => {
     try {
       await axios
-        .delete(`${serverUrl}/api/products/${id}`)
+        .delete(`${serverUrl}/api/products/${id}`, getAdminAuthConfig())
         .then(() => {
           const date = Date.now();
           dispatch(
@@ -320,6 +337,120 @@ export const AddedProductCard = ({
             setPopUp({
               text: "هل تريد حذف المنتج نهائياً ؟",
               action: () => deleteProduct(product.id),
+            })
+          }
+        >
+          حذف
+        </button>
+        {popUp && (
+          <PopUp
+            text={popUp.text}
+            onClose={() => setPopUp(null)}
+            onConfirm={() => {
+              popUp.action();
+            }}
+          />
+        )}
+      </div>
+    </div>
+  );
+};
+
+export const AddedTestCard = ({
+  test,
+}: {
+  test: {
+    id: string | number;
+    title: string;
+    text: string;
+    productId: string;
+    images: string[];
+  };
+}) => {
+  const serverUrl = import.meta.env.REACT_APP_SERVER_URL;
+  const [popUp, setPopUp] = useState<null | {
+    text: string;
+    action: () => void;
+  }>(null);
+  const [refProduct, setRefProduct] = useState<{ title: string } | null>(null);
+  const dispatch = useDispatch();
+
+  const deleteTest = async (id: string | number) => {
+    try {
+      await axios.delete(
+        `${serverUrl}/api/tests/${id}`,
+        getAdminAuthConfig(),
+      );
+      dispatch(
+        addMsg({
+          text: "تم حذف التجربة بنجاح",
+          type: "success",
+          id: Date.now(),
+        }),
+      );
+      document.location.reload();
+    } catch (error) {
+      console.error("Failed to delete test:", error);
+      dispatch(
+        addMsg({
+          text: "تعذر حذف التجربة",
+          type: "error",
+          id: Date.now(),
+        }),
+      );
+    }
+  };
+
+  const getRefProduct = useCallback(async () => {
+    try {
+      await axios
+        .get(`${serverUrl}/api/products/${test.productId}`)
+        .then((res) => {
+          setRefProduct(res.data);
+        })
+        .catch(() => {
+          const date = Date.now();
+          dispatch(addMsg({ text: "خطأ بالسيرفير", type: "error", id: date }));
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  }, [dispatch, serverUrl, test.productId]);
+
+  useEffect(() => {
+    if (test.productId) void getRefProduct();
+  }, [getRefProduct, test.productId]);
+
+  return (
+    <div className="product-card w-full flex flex-col lg:flex-row gap-5 justify-between items-center p-3 bg-paper rounded-lg border-2 border-border my-1">
+      <div className="right flex items-center gap-5 lg:gap-3">
+        <div className="img-box w-20 h-20 overflow-hidden rounded-lg">
+          <img src={serverUrl + test.images[0]} alt={test.title + "Image"} />
+        </div>
+        <div className="text-soil flex flex-col gap-2">
+          <h3 className="title">{test.title}</h3>
+          <div className="category-unit text-muted label">
+            {/* TODO: Here we Will put Product */}
+            <Link to={"/product/" + test.productId}>
+              {refProduct && refProduct.title}
+            </Link>
+          </div>
+        </div>
+      </div>
+      <div className="left flex gap-4 items-center">
+        <Link
+          to={"/admin/tests/edit/" + test.id}
+          className="flex-1 border-border border-2 px-5 py-3 rounded-lg font-bold cursor-pointer bg-field hover:bg-paper text-soil"
+          reloadDocument
+        >
+          تعديل
+        </Link>
+        <button
+          className="flex-1 border-border border-2 px-5 py-3 rounded-lg font-bold cursor-pointer hover:bg-danger-tint bg-field text-danger"
+          onClick={() =>
+            setPopUp({
+              text: "هل تريد حذف التجربة نهائياً ؟",
+              action: () => deleteTest(test.id),
             })
           }
         >

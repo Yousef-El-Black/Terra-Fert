@@ -27,15 +27,19 @@ export const WhatsappBtn = ({
 }: {
   text: string;
   icon: ReactNode;
-  link: string;
+  link: string | null;
 }) => {
+  if (!link) return null;
+
   return (
-    <Link
-      to={link}
+    <a
       className="bg-whatsapp text-paper flex justify-center items-center gap-2 px-4 py-3 w-fit rounded-md label-lg hover:bg-whatsapp-hover"
+      href={link}
+      target="_blank"
+      rel="noopener noreferrer"
     >
       {icon} {text}
-    </Link>
+    </a>
   );
 };
 
@@ -43,18 +47,24 @@ export const WhatsappOrderBtn = ({
   text,
   icon,
   link,
+  message,
 }: {
   text: string;
   icon: ReactNode;
-  link: string;
+  link: string | null;
+  message: string;
 }) => {
+  if (!link) return null;
+
   return (
-    <Link
-      to={link}
+    <a
       className="bg-whatsapp text-paper flex justify-center items-center gap-2 px-4 py-3 w-full rounded-md label-lg hover:bg-whatsapp-hover"
+      href={`${link}?text=${encodeURIComponent(message)}`}
+      target="_blank"
+      rel="noopener noreferrer"
     >
       {icon} {text}
-    </Link>
+    </a>
   );
 };
 

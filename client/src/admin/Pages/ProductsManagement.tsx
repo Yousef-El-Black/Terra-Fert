@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { SearchInput } from "../../components/Inputs";
 import { CategoryTag } from "../../components/Tags";
 import { Link, useSearchParams } from "react-router-dom";
@@ -52,7 +52,7 @@ const ProductsManagement = () => {
     }
   };
 
-  const getProducts = async () => {
+  const getProducts = useCallback(async () => {
     try {
       await axios.get(`${serverUrl}/api/products/`).then((res) => {
         setProducts(res.data);
@@ -61,11 +61,11 @@ const ProductsManagement = () => {
     } catch (error) {
       console.log(error);
     }
-  };
+  }, [serverUrl]);
 
   useEffect(() => {
-    getProducts();
-  }, []);
+    void getProducts();
+  }, [getProducts]);
 
   return (
     <section>

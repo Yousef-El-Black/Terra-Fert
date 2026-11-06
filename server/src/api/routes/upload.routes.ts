@@ -1,4 +1,5 @@
 import { Router, IRouter } from "express";
+import { requireAdmin } from "../../middleware/adminAuth";
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
@@ -35,35 +36,39 @@ export const upload = multer({
 
 const uploadRoutes: IRouter = Router();
 
-uploadRoutes.post("/", upload.single("image_input"), (req, res) => {
-  const file = (
-    req as typeof req & {
-      file?: { originalname: string; filename: string; size: number };
-    }
-  ).file;
+uploadRoutes.post(
+  "/",
+  requireAdmin,
+  upload.single("image_input"),
+  (req, res) => {
+    const file = (
+      req as typeof req & {
+        file?: { originalname: string; filename: string; size: number };
+      }
+    ).file;
 
-  try {
-    if (!file) {
-      return res
-        .status(400)
-        .json({ error: "Please select an image to upload." });
-    }
+    try {
+      if (!file) {
+        return res
+          .status(400)
+          .json({ error: "Please select an image to upload." });
+      }
 
-    // File successfully uploaded
-    res.status(200).json({
-      message: "Image uploaded successfully!",
-      fileInfo: {
-        originalName: file.originalname,
-        filename: file.filename,
-        path: `/api/uploads/${file.filename}`,
-        size: file.size,
-      },
-    });
-  } catch (error) {
-    res.status(500).json({
-      error: error instanceof Error ? error.message : String(error),
-    });
-  }
-});
+      res.status(200).json({
+        message: "Image uploaded successfully!",
+        fileInfo: {
+          originalName: file.originalname,
+          filename: file.filename,
+          path: `/api/uploads/${file.filename}`,
+          size: file.size,
+        },
+      });
+    } catch (error) {
+      res.status(500).json({
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  },
+);
 
 export default uploadRoutes;

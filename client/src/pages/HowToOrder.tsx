@@ -1,7 +1,10 @@
 import { WhatsappBtn } from "../components/Btns";
 import ChatIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
+import { useWhatsAppSettings } from "../components/useWhatsAppSettings";
 
 const HowToOrder = () => {
+  const { whatsappLink } = useWhatsAppSettings();
+
   return (
     <>
       <section className="py-20">
@@ -85,7 +88,7 @@ const HowToOrder = () => {
             <div className="flex-1 flex justify-center items-center">
               <WhatsappBtn
                 text="واتساب"
-                link="/"
+                link={whatsappLink}
                 icon={<ChatIcon fontSize="small" />}
               />
             </div>

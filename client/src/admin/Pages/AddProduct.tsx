@@ -6,12 +6,14 @@ import { AddToCartBtn, WhatsappOrderBtn } from "../../components/Btns";
 import ChatIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
 import PlantIcon from "@mui/icons-material/Grass";
 import PreviewIcon from "@mui/icons-material/RemoveRedEye";
-import { AddedProductCard } from "../../components/Cards";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { addMsg } from "../../redux/slices/msgSlice";
+import { useWhatsAppSettings } from "../../components/useWhatsAppSettings";
+import { getAdminAuthConfig } from "../utils/adminAuth";
 
 const AddProduct = () => {
+  const { whatsappLink } = useWhatsAppSettings();
   const dispatch = useDispatch();
   const serverUrl = import.meta.env.REACT_APP_SERVER_URL;
   const [status, setStatus] = useState<boolean>(true);
@@ -64,7 +66,7 @@ const AddProduct = () => {
         return axios
           .post<{
             fileInfo: { path: string };
-          }>(`${serverUrl}/api/upload/`, formData)
+          }>(`${serverUrl}/api/upload/`, formData, getAdminAuthConfig())
           .then((res) => res.data.fileInfo.path);
       }),
     );
@@ -75,15 +77,19 @@ const AddProduct = () => {
     try {
       const uploadedImages = await handleUploadImages();
       await axios
-        .post(`${serverUrl}/api/products/`, {
-          description,
-          images: uploadedImages,
-          title,
-          category,
-          status: status ? "متوفر" : "غير متوفر",
-          unit,
-          rating: [],
-        })
+        .post(
+          `${serverUrl}/api/products/`,
+          {
+            description,
+            images: uploadedImages,
+            title,
+            category,
+            status: status ? "متوفر" : "غير متوفر",
+            unit,
+            rating: [],
+          },
+          getAdminAuthConfig(),
+        )
         .then((res) => {
           const date = Date.now();
           dispatch(
@@ -352,32 +358,13 @@ const AddProduct = () => {
                   <AddToCartBtn text="اضف الى السلة" onClick={() => {}} />
                   <WhatsappOrderBtn
                     text="اطلب عبر الواتساب"
-                    link="https://wa.me/1234567890"
+                    link={whatsappLink}
                     icon={<ChatIcon fontSize="small" />}
+                    message={`السلام عليكم، أرغب في طلب:\n${title || "المنتج"}\nالكمية: 1`}
                   />
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-        <div className="other-products">
-          <div className="head mt-5 flex justify-between items-center">
-            <h2>المنتجات المضافة</h2>
-            {/* FIXME: Change the 3 to products Count*/}
-            <p className="text-muted">3 منتج</p>
-          </div>
-          <div className="products-container flex flex-col gap-5">
-            {/* FIXME: Here we will add Map for Products */}
-            <AddedProductCard
-              product={{
-                id: "7",
-                images: ["https://via.placeholder.com/150"],
-                title: "مبيد حشائش 3",
-                category: "مبيدات حشائش",
-                status: "متوفر",
-                unit: "كيس",
-              }}
-            />
           </div>
         </div>
       </div>

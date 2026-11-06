@@ -7,18 +7,19 @@ import {
   getProducts,
   updateProductById,
 } from "../../controllers/product.controller";
+import { requireAdmin } from "../../middleware/adminAuth";
 
 const productRoutes: IRouter = Router();
 
-productRoutes.post("/", createProduct);
+productRoutes.post("/", requireAdmin, createProduct);
 
 productRoutes.get("/count", countProducts);
 
 productRoutes.get("/:id", getProductById);
 
-productRoutes.delete("/:id", deleteProductById);
+productRoutes.delete("/:id", requireAdmin, deleteProductById);
 
-productRoutes.put("/:id", updateProductById);
+productRoutes.put("/:id", requireAdmin, updateProductById);
 
 productRoutes.get("/", getProducts);
 

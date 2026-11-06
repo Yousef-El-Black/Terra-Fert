@@ -1,6 +1,6 @@
 import UploadIcon from "@mui/icons-material/Upload";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { AvailableBadge } from "../../components/Badges";
 import { AddToCartBtn, WhatsappOrderBtn } from "../../components/Btns";
 import ChatIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
@@ -10,6 +10,8 @@ import { AddedProductCard } from "../../components/Cards";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { addMsg } from "../../redux/slices/msgSlice";
+import { useWhatsAppSettings } from "../../components/useWhatsAppSettings";
+import { getAdminAuthConfig } from "../utils/adminAuth";
 
 interface Product {
   _id: string | number;
@@ -21,6 +23,7 @@ interface Product {
 }
 
 const EditProduct = () => {
+  const { whatsappLink } = useWhatsAppSettings();
   const dispatch = useDispatch();
   const serverUrl = import.meta.env.REACT_APP_SERVER_URL;
   const [status, setStatus] = useState<boolean>(true);
@@ -71,7 +74,7 @@ const EditProduct = () => {
     }
   };
 
-  const getProduct = async () => {
+  const getProduct = useCallback(async () => {
     try {
       await axios
         .get(`${serverUrl}/api/products/${productId}`)
@@ -90,7 +93,7 @@ const EditProduct = () => {
     } catch (error) {
       console.log(error);
     }
-  };
+  }, [dispatch, productId, serverUrl]);
 
   const handleUploadImages = async () => {
     const paths = await Promise.all(
@@ -100,7 +103,7 @@ const EditProduct = () => {
         return axios
           .post<{
             fileInfo: { path: string };
-          }>(`${serverUrl}/api/upload/`, formData)
+          }>(`${serverUrl}/api/upload/`, formData, getAdminAuthConfig())
           .then((res) => res.data.fileInfo.path);
       }),
     );
@@ -111,14 +114,18 @@ const EditProduct = () => {
     try {
       await handleUploadImages();
       await axios
-        .put(`${serverUrl}/api/products/${productId}`, {
-          description,
-          images: uploadedImages,
-          title,
-          category,
-          status: status ? "متوفر" : "غير متوفر",
-          unit,
-        })
+        .put(
+          `${serverUrl}/api/products/${productId}`,
+          {
+            description,
+            images: uploadedImages,
+            title,
+            category,
+            status: status ? "متوفر" : "غير متوفر",
+            unit,
+          },
+          getAdminAuthConfig(),
+        )
         .then((res) => {
           const date = Date.now();
           console.log(res);
@@ -141,7 +148,7 @@ const EditProduct = () => {
     }
   };
 
-  const getProducts = async () => {
+  const getProducts = useCallback(async () => {
     try {
       await axios.get(`${serverUrl}/api/products/`).then((res) => {
         setProducts(res.data);
@@ -150,12 +157,12 @@ const EditProduct = () => {
     } catch (error) {
       console.log(error);
     }
-  };
+  }, [serverUrl]);
 
   useEffect(() => {
-    getProducts();
-    getProduct();
-  }, []);
+    void getProducts();
+    void getProduct();
+  }, [getProduct, getProducts]);
 
   return (
     <section>
@@ -422,8 +429,9 @@ const EditProduct = () => {
                   <AddToCartBtn text="اضف الى السلة" onClick={() => {}} />
                   <WhatsappOrderBtn
                     text="اطلب عبر الواتساب"
-                    link="https://wa.me/1234567890"
+                    link={whatsappLink}
                     icon={<ChatIcon fontSize="small" />}
+                    message={`السلام عليكم، أرغب في طلب:\n${title || "المنتج"}\nالكمية: 1`}
                   />
                 </div>
               </div>
