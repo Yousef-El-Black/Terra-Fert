@@ -3,6 +3,9 @@ import { MONGO_DB_URI, PORT } from "./config";
 import mainRoutes from "./api";
 import cors from "cors";
 import { connectDB } from "./utils/connectDB";
+import dotenv from "dotenv";
+
+dotenv.config({ path: "../.env" });
 
 // Define App
 const app = express();
