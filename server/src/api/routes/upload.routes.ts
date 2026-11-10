@@ -5,7 +5,9 @@ const path = require("path");
 const fs = require("fs");
 import sharp from "sharp";
 
-export const uploadDir = path.resolve(__dirname, "../../uploads");
+export const uploadDir = process.env.VERCEL
+  ? path.join("/tmp", "terrafert-uploads")
+  : path.resolve(__dirname, "../../uploads");
 fs.mkdirSync(uploadDir, { recursive: true });
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
