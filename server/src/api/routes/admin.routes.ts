@@ -21,7 +21,6 @@ adminRoutes.get("/me", requireAdmin, (_req, res) => {
   return res.status(200).json(res.locals.admin);
 });
 
-adminRoutes.use();
 adminRoutes.post("/", requireSuperAdmin, createAdmin);
 adminRoutes.get("/", requireSuperAdmin, getAdmins);
 adminRoutes.get("/:id", requireSuperAdmin, getAdminById);
