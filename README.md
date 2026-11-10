@@ -60,6 +60,12 @@ JWT_SECRET=replace-with-a-long-random-secret
 Use a unique, high-entropy secret in each deployed environment. Do not commit
 environment files or put server secrets in the client configuration.
 
+The server loads `server/.env` relative to its source/build location, so local
+startup does not depend on the terminal's current directory. In production,
+set `MONGO_DB_URI` and `JWT_SECRET` in the backend host's environment/secrets
+settings (and `PORT` if the host does not provide it). Restart or redeploy the
+backend after changing those settings.
+
 Create `client/.env.local` and set the API origin:
 
 ```dotenv
@@ -126,31 +132,31 @@ outside the application.
 All API routes are prefixed with `/api`. Admin-protected routes expect
 `Authorization: Bearer <token>`.
 
-| Method | Path | Access | Purpose |
-|---|---|---|---|
-| `GET` | `/products` | Public | List products |
-| `GET` | `/products/count` | Public | Count products |
-| `GET` | `/products/:id` | Public | Get a product |
-| `POST` | `/products` | Admin | Create a product |
-| `PUT` | `/products/:id` | Admin | Update a product |
-| `DELETE` | `/products/:id` | Admin | Delete a product |
-| `GET` | `/tests` | Public | List field trials |
-| `GET` | `/tests/:id` | Public | Get a field trial |
-| `POST` | `/tests` | Admin | Create a field trial |
-| `PUT` | `/tests/:id` | Admin | Update a field trial |
-| `DELETE` | `/tests/:id` | Admin | Delete a field trial |
-| `POST` | `/upload` | Admin | Upload one image as multipart field `image_input` |
-| `GET` | `/uploads/:filename` | Public | Serve an uploaded image |
-| `GET` | `/admins/setup-status` | Public | Check if initial setup is needed |
-| `POST` | `/admins/register-super-admin` | Public, first setup only | Register the initial super-admin |
-| `POST` | `/admins/login` | Public | Sign in and receive a bearer token |
-| `GET` | `/admins/me` | Admin | Get the current admin identity |
-| `GET`, `POST` | `/admins` | Super-admin | List or create admin accounts |
-| `GET`, `PUT`, `DELETE` | `/admins/:id` | Super-admin | Read, update, or delete an admin account |
-| `GET` | `/social` | Public | List active contact/social links |
-| `GET` | `/social/manage` | Super-admin | List all contact/social entries |
-| `POST` | `/social` | Super-admin | Create a contact/social entry |
-| `PUT`, `DELETE` | `/social/:id` | Super-admin | Update or delete a contact/social entry |
+| Method                 | Path                           | Access                   | Purpose                                           |
+| ---------------------- | ------------------------------ | ------------------------ | ------------------------------------------------- |
+| `GET`                  | `/products`                    | Public                   | List products                                     |
+| `GET`                  | `/products/count`              | Public                   | Count products                                    |
+| `GET`                  | `/products/:id`                | Public                   | Get a product                                     |
+| `POST`                 | `/products`                    | Admin                    | Create a product                                  |
+| `PUT`                  | `/products/:id`                | Admin                    | Update a product                                  |
+| `DELETE`               | `/products/:id`                | Admin                    | Delete a product                                  |
+| `GET`                  | `/tests`                       | Public                   | List field trials                                 |
+| `GET`                  | `/tests/:id`                   | Public                   | Get a field trial                                 |
+| `POST`                 | `/tests`                       | Admin                    | Create a field trial                              |
+| `PUT`                  | `/tests/:id`                   | Admin                    | Update a field trial                              |
+| `DELETE`               | `/tests/:id`                   | Admin                    | Delete a field trial                              |
+| `POST`                 | `/upload`                      | Admin                    | Upload one image as multipart field `image_input` |
+| `GET`                  | `/uploads/:filename`           | Public                   | Serve an uploaded image                           |
+| `GET`                  | `/admins/setup-status`         | Public                   | Check if initial setup is needed                  |
+| `POST`                 | `/admins/register-super-admin` | Public, first setup only | Register the initial super-admin                  |
+| `POST`                 | `/admins/login`                | Public                   | Sign in and receive a bearer token                |
+| `GET`                  | `/admins/me`                   | Admin                    | Get the current admin identity                    |
+| `GET`, `POST`          | `/admins`                      | Super-admin              | List or create admin accounts                     |
+| `GET`, `PUT`, `DELETE` | `/admins/:id`                  | Super-admin              | Read, update, or delete an admin account          |
+| `GET`                  | `/social`                      | Public                   | List active contact/social links                  |
+| `GET`                  | `/social/manage`               | Super-admin              | List all contact/social entries                   |
+| `POST`                 | `/social`                      | Super-admin              | Create a contact/social entry                     |
+| `PUT`, `DELETE`        | `/social/:id`                  | Super-admin              | Update or delete a contact/social entry           |
 
 Product availability is represented by `status` (`"متوفر"` or `"غير متوفر"`).
 Product image paths are stored in the `images` array. Field trials contain
@@ -189,7 +195,9 @@ The server package currently has no automated test suite configured; its
   `client/dist` directory from a static host.
 - Build and run the API from `server`; provide `PORT`, `MONGO_DB_URI`, and
   `JWT_SECRET` through the deployment platform's secret/configuration manager.
-- Set `REACT_APP_SERVER_URL` to the deployed API origin at client build time.
+- Set `REACT_APP_SERVER_URL` to the deployed API origin in the client host's
+  build-time environment before building the client. Client environment values
+  are compiled into the browser bundle; changing them requires a new build.
 - Persist `server/src/uploads` (or configure durable object storage) if uploaded
   images must survive application restarts or redeployments.
 - Configure production CORS for the intended storefront/admin origins before

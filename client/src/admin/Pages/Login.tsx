@@ -68,9 +68,7 @@ const Login = () => {
     try {
       const { data } = await axios.post<{ token: string }>(
         `${serverUrl}/api/admins/${
-          setupState === "register"
-            ? "register-super-admin"
-            : "login"
+          setupState === "register" ? "register-super-admin" : "login"
         }`,
         { username, password },
       );
@@ -160,78 +158,78 @@ const Login = () => {
                 </button>
               </div>
             ) : (
-            <form className="py-3 flex flex-col gap-5 text-soil">
-              <div className="username flex-col flex">
-                <label className="font-bold text-md" htmlFor="admin-username">
-                  اسم المستخدم
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter username"
-                  className="bg-field p-3 my-2 rounded-lg border-border border-2"
-                  dir="ltr"
-                  id="admin-username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                />
-              </div>
-
-              <div className="password flex-col flex w-full">
-                <label className="font-bold text-md" htmlFor="admin-password">
-                  كلمة المرور
-                </label>
-                <div className="pass-input w-full flex relative">
+              <form className="py-3 flex flex-col gap-5 text-soil">
+                <div className="username flex-col flex">
+                  <label className="font-bold text-md" htmlFor="admin-username">
+                    اسم المستخدم
+                  </label>
                   <input
-                    type={!passwordVisibility ? "password" : "text"}
-                    className="bg-field p-3 my-2 rounded-lg border-border border-2 w-full"
-                    placeholder="Enter Password"
+                    type="text"
+                    placeholder="Enter username"
+                    className="bg-field p-3 my-2 rounded-lg border-border border-2"
                     dir="ltr"
-                    id="admin-password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    id="admin-username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                   />
-                  <div
-                    className="show-password cursor-pointer absolute top-1/2 -translate-y-1/2 right-4"
-                    onClick={togglePasswordVisibility}
-                  >
-                    {!passwordVisibility ? <EyeIcon /> : <HideIcon />}
+                </div>
+
+                <div className="password flex-col flex w-full">
+                  <label className="font-bold text-md" htmlFor="admin-password">
+                    كلمة المرور
+                  </label>
+                  <div className="pass-input w-full flex relative">
+                    <input
+                      type={!passwordVisibility ? "password" : "text"}
+                      className="bg-field p-3 my-2 rounded-lg border-border border-2 w-full"
+                      placeholder="Enter Password"
+                      dir="ltr"
+                      id="admin-password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <div
+                      className="show-password cursor-pointer absolute top-1/2 -translate-y-1/2 right-4"
+                      onClick={togglePasswordVisibility}
+                    >
+                      {!passwordVisibility ? <EyeIcon /> : <HideIcon />}
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="remember-me flex items-center gap-4">
-                <input
-                  type="checkbox"
-                  name="remember"
-                  id="remember"
-                  className="w-5 h-5"
-                  checked={remember}
-                  onChange={(e) => setRemember(e.target.checked)}
-                />
-                <label className="text-soil" htmlFor="remember">
-                  تذكّرني على هذا الجهاز
-                </label>
-              </div>
-              <div className="submit">
-                {errorMessage && (
-                  <p className="mb-3 text-danger" role="alert">
-                    {errorMessage}
-                  </p>
-                )}
-                <button
-                  className="bg-leaf hover:opacity-80 cursor-pointer rounded-lg p-4 font-bold text-field text-xl w-full"
-                  onClick={handleSubmit}
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting
-                    ? setupState === "register"
-                      ? "جارٍ إنشاء الحساب..."
-                      : "جارٍ تسجيل الدخول..."
-                    : setupState === "register"
-                      ? "إنشاء حساب المدير العام"
-                      : "دخول"}
-                </button>
-              </div>
-            </form>
+                <div className="remember-me flex items-center gap-4">
+                  <input
+                    type="checkbox"
+                    name="remember"
+                    id="remember"
+                    className="w-5 h-5"
+                    checked={remember}
+                    onChange={(e) => setRemember(e.target.checked)}
+                  />
+                  <label className="text-soil" htmlFor="remember">
+                    تذكّرني على هذا الجهاز
+                  </label>
+                </div>
+                <div className="submit">
+                  {errorMessage && (
+                    <p className="mb-3 text-danger" role="alert">
+                      {errorMessage}
+                    </p>
+                  )}
+                  <button
+                    className="bg-leaf hover:opacity-80 cursor-pointer rounded-lg p-4 font-bold text-field text-xl w-full"
+                    onClick={handleSubmit}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting
+                      ? setupState === "register"
+                        ? "جارٍ إنشاء الحساب..."
+                        : "جارٍ تسجيل الدخول..."
+                      : setupState === "register"
+                        ? "إنشاء حساب المدير العام"
+                        : "دخول"}
+                  </button>
+                </div>
+              </form>
             )}
             <Link
               to="/"

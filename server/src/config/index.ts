@@ -1,13 +1,19 @@
+import { resolve } from "node:path";
 import dotenv from "dotenv";
 
-dotenv.config();
-dotenv.config({ path: "../.env" });
-dotenv.config({ path: "../../.env" });
-dotenv.config({ path: "./.env" });
-dotenv.config({ path: ".env" });
-dotenv.config({ path: ".env.prod" });
-dotenv.config({ path: ".env.local" });
-dotenv.config({ path: ".env.dev" });
-dotenv.config({ path: ".env.prev" });
+dotenv.config({ path: resolve(__dirname, "../../.env") });
 
-export const { PORT, MONGO_DB_URI, JWT_SECRET } = process.env;
+const { PORT } = process.env;
+
+const getRequiredVariable = (name: string): string => {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+  return value;
+};
+
+const MONGO_DB_URI = getRequiredVariable("MONGO_DB_URI");
+const JWT_SECRET = getRequiredVariable("JWT_SECRET");
+
+export { PORT, MONGO_DB_URI, JWT_SECRET };

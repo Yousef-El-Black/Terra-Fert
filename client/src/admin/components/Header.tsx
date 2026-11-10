@@ -1,7 +1,15 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import RightArrowIcon from "@mui/icons-material/ArrowRightAlt";
 
 const Header = () => {
+  const navigate = useNavigate();
+
+  const logout = () => {
+    localStorage.removeItem("adminToken");
+    sessionStorage.removeItem("adminToken");
+    navigate("/admin/");
+  };
+
   return (
     <header className="h-auto sticky z-90 top-0 border-b-2 border-border bg-cream">
       <div className="container flex items-center justify-between py-3">
@@ -27,7 +35,10 @@ const Header = () => {
             عرض المتجر
           </Link>
         </div>
-        <button className="logout border-border border-2 bg-field flex justify-center items-center gap-3 text-soil py-3 px-5 font-bold rounded-lg cursor-pointer hover:bg-paper">
+        <button
+          className="logout border-border border-2 bg-field flex justify-center items-center gap-3 text-soil py-3 px-5 font-bold rounded-lg cursor-pointer hover:bg-paper"
+          onClick={logout}
+        >
           تسجيل الخروج
         </button>
       </div>

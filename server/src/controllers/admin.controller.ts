@@ -51,7 +51,9 @@ export const loginAdmin = async (req: Request, res: Response) => {
     !body.username.trim() ||
     !body.password
   ) {
-    return res.status(400).json({ error: "Username and password are required." });
+    return res
+      .status(400)
+      .json({ error: "Username and password are required." });
   }
 
   if (!JWT_SECRET) {
@@ -67,11 +69,7 @@ export const loginAdmin = async (req: Request, res: Response) => {
       return res.status(401).json({ error: "Invalid username or password." });
     }
 
-    const token = jwt.sign(
-      { sub: admin.id },
-      JWT_SECRET,
-      { expiresIn: "8h" },
-    );
+    const token = jwt.sign({ sub: admin.id }, JWT_SECRET, { expiresIn: "8h" });
     return res.status(200).json({ token, admin: publicAdmin(admin) });
   } catch (error) {
     return respondWithError(res, error, "log in admin");
@@ -111,7 +109,9 @@ export const registerInitialSuperAdmin = async (
 
   try {
     if (await adminModel.exists({})) {
-      return res.status(409).json({ error: "Admin setup is already complete." });
+      return res
+        .status(409)
+        .json({ error: "Admin setup is already complete." });
     }
 
     const admin = await adminModel.create({
@@ -131,7 +131,9 @@ export const registerInitialSuperAdmin = async (
       "code" in error &&
       error.code === 11000
     ) {
-      return res.status(409).json({ error: "Admin setup is already complete." });
+      return res
+        .status(409)
+        .json({ error: "Admin setup is already complete." });
     }
     return respondWithError(res, error, "register initial super-admin");
   }

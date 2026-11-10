@@ -3,7 +3,6 @@ import { MONGO_DB_URI, PORT } from "./config";
 import mainRoutes from "./api";
 import cors from "cors";
 import { connectDB } from "./utils/connectDB";
-import dotenv from "dotenv";
 
 // Define App
 const app = express();
@@ -15,7 +14,7 @@ app.use(cors());
 const port = PORT || 3000;
 
 // Connect Database
-connectDB(MONGO_DB_URI ? MONGO_DB_URI : "");
+connectDB(MONGO_DB_URI);
 
 // Parse JSON to Read Data from FrontEnd
 app.use(express.json());
