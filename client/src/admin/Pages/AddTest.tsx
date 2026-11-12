@@ -116,7 +116,7 @@ const AddTest = () => {
           );
         })
         .then(() => {
-          document.location.assign("/admin/tests/");
+          document.location.assign("/admin/tests");
         })
         .catch((err) => {
           console.error("Failed to create test:", err.response?.data ?? err);

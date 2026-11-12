@@ -78,7 +78,7 @@ const Login = () => {
         "adminToken",
         data.token,
       );
-      document.location.assign("/admin/");
+      document.location.assign("/admin");
     } catch (error) {
       console.error("Failed to authenticate admin:", error);
       const apiError = axios.isAxiosError<{ error?: string }>(error)

@@ -101,7 +101,7 @@ const AddProduct = () => {
           );
         })
         .then(() => {
-          document.location.assign("/admin/products/");
+          document.location.assign("/admin/products");
         })
         .catch((err) => {
           console.error("Failed to create product:", err.response?.data ?? err);
