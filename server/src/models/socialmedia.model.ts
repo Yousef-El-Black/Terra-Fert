@@ -1,25 +1,21 @@
-import mongoose from "mongoose";
+import type { RowDataPacket } from "mysql2";
 
-const socialMediaSchema = new mongoose.Schema(
-  {
-    name: { type: String, required: true },
-    link: { type: String, required: true },
-    platform: {
-      type: String,
-      enum: [
-        "whatsapp",
-        "facebook",
-        "instagram",
-        "website",
-        "email",
-        "phone",
-        "address",
-        "other",
-      ],
-    },
-    active: { type: Boolean, required: true, default: true },
-  },
-  { timestamps: true },
-);
+export interface SocialMediaRow extends RowDataPacket {
+  _id: string;
+  name: string;
+  link: string;
+  platform: string | null;
+  active: boolean | number;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
-export default mongoose.model("SocialMedia", socialMediaSchema);
+export const socialMediaFields = `
+  id AS _id,
+  name,
+  link,
+  platform,
+  active,
+  created_at AS createdAt,
+  updated_at AS updatedAt
+`;

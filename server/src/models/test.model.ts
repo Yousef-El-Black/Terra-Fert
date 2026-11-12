@@ -1,13 +1,21 @@
-import mongoose from "mongoose";
+import type { RowDataPacket } from "mysql2";
 
-const testSchema = new mongoose.Schema(
-  {
-    images: { type: [String], default: [] },
-    productId: { type: mongoose.Types.ObjectId },
-    title: { type: String, required: true, default: "" },
-    text: { type: String, required: true, default: "" },
-  },
-  { timestamps: true },
-);
+export interface TestRow extends RowDataPacket {
+  _id: string;
+  images: string[] | string;
+  productId: string | null;
+  title: string;
+  text: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
-export default mongoose.model("Test", testSchema);
+export const testFields = `
+  id AS _id,
+  images,
+  product_id AS productId,
+  title,
+  text,
+  created_at AS createdAt,
+  updated_at AS updatedAt
+`;

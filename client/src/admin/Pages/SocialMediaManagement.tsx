@@ -101,7 +101,8 @@ const inferPlatform = (item: SocialMedia): SocialPlatform => {
   const name = item.name.toLocaleLowerCase();
   if (name.includes("whatsapp") || name.includes("واتساب")) return "whatsapp";
   if (name.includes("facebook") || name.includes("فيسبوك")) return "facebook";
-  if (name.includes("instagram") || name.includes("إنستغرام")) return "instagram";
+  if (name.includes("instagram") || name.includes("إنستغرام"))
+    return "instagram";
   if (name.includes("email") || name.includes("بريد")) return "email";
   if (name.includes("phone") || name.includes("هاتف")) return "phone";
   if (name.includes("address") || name.includes("عنوان")) return "address";
@@ -143,9 +144,9 @@ const SocialMediaManagement = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [accessError, setAccessError] = useState<
-    "login" | "superadmin" | null
-  >(null);
+  const [accessError, setAccessError] = useState<"login" | "superadmin" | null>(
+    null,
+  );
 
   const notify = (text: string, type: "success" | "error") => {
     dispatch(addMsg({ id: Date.now(), text, type }));
@@ -332,7 +333,7 @@ const SocialMediaManagement = () => {
                         ? "البريد الإلكتروني"
                         : platform === "address"
                           ? "العنوان"
-                        : "الرابط"}
+                          : "الرابط"}
                   {platform === "address" ? (
                     <textarea
                       className="rounded-lg border-2 border-border bg-field p-3 font-normal"
@@ -385,7 +386,7 @@ const SocialMediaManagement = () => {
               <button
                 type="submit"
                 disabled={isSaving}
-                className="w-fit rounded-lg border-2 border-border bg-leaf px-5 py-3 font-bold text-leaf-tint disabled:opacity-60"
+                className="w-fit rounded-lg border-2 border-border bg-leaf px-5 py-3 font-bold text-leaf-tint disabled:opacity-60 cursor-pointer"
               >
                 {isSaving ? "جارٍ الحفظ..." : "إضافة"}
               </button>
@@ -436,7 +437,7 @@ const SocialMediaManagement = () => {
                                     ? "البريد الإلكتروني"
                                     : editingPlatform === "address"
                                       ? "العنوان"
-                                    : "الرابط"}
+                                      : "الرابط"}
                               {editingPlatform === "address" ? (
                                 <textarea
                                   className="rounded-lg border-2 border-border bg-field p-3 font-normal"

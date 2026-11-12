@@ -1,5 +1,5 @@
 import express from "express";
-import { MONGO_DB_URI, PORT } from "./config";
+import { PORT } from "./config";
 import mainRoutes from "./api";
 import cors from "cors";
 import { connectDB } from "./utils/connectDB";
@@ -13,16 +13,20 @@ app.use(cors());
 // Define Port
 const port = PORT || 3000;
 
-// Connect Database
-connectDB(MONGO_DB_URI);
-
 // Parse JSON to Read Data from FrontEnd
 app.use(express.json());
 
 // API Routes
 app.use("/api", mainRoutes);
 
-// Launching App
-app.listen(port, () => {
-  console.log("App is Listening on Prot : " + port);
+const start = async () => {
+  await connectDB();
+  app.listen(port, () => {
+    console.log("App is Listening on Port : " + port);
+  });
+};
+
+void start().catch((error: unknown) => {
+  console.error("Failed to start server:", error);
+  process.exitCode = 1;
 });

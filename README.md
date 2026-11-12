@@ -1,7 +1,7 @@
 # Terra Fert
 
 Terra Fert is an Arabic-language agricultural supplies storefront with a React
-client, an Express/TypeScript API, and MongoDB persistence. Customers can browse
+client, an Express/TypeScript API, and MySQL persistence. Customers can browse
 products and field trials, keep a cart in their browser, and prepare an order
 message for WhatsApp. Administrators manage the catalogue, field trials, admin
 accounts, and public contact links.
@@ -24,7 +24,7 @@ server/
     config/            Environment configuration
     controllers/       Request handlers
     middleware/        Admin authorization
-    models/            Mongoose schemas
+    models/            MySQL row types
     uploads/           Uploaded product and field-trial images
     utils/             Database connection and upload helpers
 Demo/                  Design/reference materials
@@ -33,7 +33,7 @@ Demo/                  Design/reference materials
 ## Requirements
 
 - Node.js and npm
-- MongoDB, either a local instance or a hosted deployment
+- MySQL 8.0 or a compatible hosted MySQL service
 
 Install dependencies separately in `client` and `server`:
 
@@ -51,20 +51,32 @@ Create `server/.env` with the following variables:
 
 ```dotenv
 PORT=3000
-MONGO_DB_URI=mongodb://127.0.0.1:27017/terra-fert
+MYSQL_HOST=127.0.0.1
+MYSQL_PORT=3306
+MYSQL_USER=root
+MYSQL_PASSWORD=
+MYSQL_DATABASE=terra_fert
 JWT_SECRET=replace-with-a-long-random-secret
 ```
 
-`PORT` is optional (the server defaults to `3000`). `MONGO_DB_URI` and
-`JWT_SECRET` must be set for database access and administrator authentication.
-Use a unique, high-entropy secret in each deployed environment. Do not commit
-environment files or put server secrets in the client configuration.
+`PORT` (default `3000`), `MYSQL_PORT` (default `3306`), and
+`MYSQL_PASSWORD` (empty for local MySQL accounts without a password) are
+optional. `MYSQL_HOST`, `MYSQL_USER`, `MYSQL_DATABASE`, and `JWT_SECRET` must be
+set. The server creates its tables on startup; the configured MySQL user needs
+permission to create tables and perform normal reads and writes. Use a unique,
+high-entropy secret in each deployed environment. Do not commit environment
+files or put server secrets in the client configuration.
 
 The server loads `server/.env` relative to its source/build location, so local
 startup does not depend on the terminal's current directory. In production,
-set `MONGO_DB_URI` and `JWT_SECRET` in the backend host's environment/secrets
-settings (and `PORT` if the host does not provide it). Restart or redeploy the
-backend after changing those settings.
+set the MySQL variables and `JWT_SECRET` in the backend host's
+environment/secrets settings (and `PORT` if the host does not provide it).
+Restart or redeploy the backend after changing those settings.
+
+This switches the application backend to MySQL and creates empty MySQL tables;
+it does not copy existing documents from MongoDB. Existing records must be
+exported from MongoDB and imported into the corresponding MySQL tables before
+switching production traffic.
 
 Create `client/.env.local` and set the API origin:
 
@@ -78,7 +90,8 @@ code in client environment files.
 
 ## Run locally
 
-Start MongoDB, then run the API in a terminal:
+Start MySQL, create the database named by `MYSQL_DATABASE`, then run the API in
+a terminal:
 
 ```powershell
 cd server
@@ -193,8 +206,9 @@ The server package currently has no automated test suite configured; its
 
 - Build the client with `npm run build` in `client` and serve the generated
   `client/dist` directory from a static host.
-- Build and run the API from `server`; provide `PORT`, `MONGO_DB_URI`, and
-  `JWT_SECRET` through the deployment platform's secret/configuration manager.
+- Build and run the API from `server`; provide the MySQL connection variables
+  and `JWT_SECRET` through the deployment platform's secret/configuration
+  manager.
 - Set `REACT_APP_SERVER_URL` to the deployed API origin in the client host's
   build-time environment before building the client. Client environment values
   are compiled into the browser bundle; changing them requires a new build.

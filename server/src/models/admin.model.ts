@@ -1,18 +1,19 @@
-import mongoose from "mongoose";
+import type { RowDataPacket } from "mysql2";
 
-const adminSchema = new mongoose.Schema(
-  {
-    username: { type: String, required: true, unique: true, trim: true },
-    password: { type: String, required: true, select: false },
-    superAdmin: { type: Boolean, required: true },
-    initialSuperAdmin: { type: Boolean, select: false },
-  },
-  { timestamps: true },
-);
+export interface AdminRow extends RowDataPacket {
+  _id: string;
+  username: string;
+  password: string;
+  superAdmin: boolean | number;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
-adminSchema.index(
-  { initialSuperAdmin: 1 },
-  { unique: true, sparse: true },
-);
-
-export default mongoose.model("Admin", adminSchema);
+export const adminFields = `
+  id AS _id,
+  username,
+  password,
+  super_admin AS superAdmin,
+  created_at AS createdAt,
+  updated_at AS updatedAt
+`;

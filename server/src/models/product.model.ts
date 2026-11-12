@@ -1,29 +1,33 @@
-import mongoose from "mongoose";
+import type { RowDataPacket } from "mysql2";
 
-const ratingSchema = new mongoose.Schema(
-  {
-    name: { type: String, required: true },
-    comment: { type: String, required: true },
-    rate: { type: Number, required: true, min: 1, max: 5 },
-  },
-  { _id: false },
-);
+export interface ProductRating {
+  name: string;
+  comment: string;
+  rate: number;
+}
 
-const productSchema = new mongoose.Schema(
-  {
-    images: { type: [String], default: [] },
-    title: { type: String, required: true },
-    category: { type: String, required: true },
-    status: {
-      type: String,
-      enum: ["متوفر", "غير متوفر"],
-      default: "متوفر",
-    },
-    description: { type: String, default: "" },
-    unit: { type: String, required: true },
-    rating: { type: [ratingSchema], default: [] },
-  },
-  { timestamps: true },
-);
+export interface ProductRow extends RowDataPacket {
+  _id: string;
+  images: string[] | string;
+  title: string;
+  category: string;
+  status: string;
+  description: string;
+  unit: string;
+  rating: ProductRating[] | string;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
-export default mongoose.model("Product", productSchema);
+export const productFields = `
+  id AS _id,
+  images,
+  title,
+  category,
+  status,
+  description,
+  unit,
+  rating,
+  created_at AS createdAt,
+  updated_at AS updatedAt
+`;

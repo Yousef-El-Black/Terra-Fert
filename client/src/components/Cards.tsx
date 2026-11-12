@@ -52,7 +52,7 @@ export const ProductCard = ({ id }: { id: string | number }) => {
   return (
     <div className="product-card flex flex-col gap-4 overflow-hidden border-2 border-border rounded-lg bg-paper hover:-translate-y-2">
       <div
-        className="img-box flex justify-center items-center text-soil label flex-col cursor-pointer relative"
+        className="img-box flex justify-center items-center text-soil label flex-col cursor-pointer relative min-h-50"
         style={{
           backgroundColor:
             product.category === "مبيدات حشائش"
@@ -78,7 +78,7 @@ export const ProductCard = ({ id }: { id: string | number }) => {
                                 : "var(--color-tile-1)",
         }}
       >
-        {product.images ? (
+        {product.images && product.images.length > 0 && product.images[0] ? (
           <img
             src={`${serverUrl}${product.images.length > 0 && product.images[0]}`}
             alt={product.title}
@@ -377,10 +377,7 @@ export const AddedTestCard = ({
 
   const deleteTest = async (id: string | number) => {
     try {
-      await axios.delete(
-        `${serverUrl}/api/tests/${id}`,
-        getAdminAuthConfig(),
-      );
+      await axios.delete(`${serverUrl}/api/tests/${id}`, getAdminAuthConfig());
       dispatch(
         addMsg({
           text: "تم حذف التجربة بنجاح",

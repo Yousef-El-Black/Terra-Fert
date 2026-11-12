@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config";
-import adminModel from "../models/admin.model";
+import { AdminRow, adminFields } from "../models/admin.model";
+import { queryRows } from "../utils/connectDB";
 
 const authenticateAdmin = async (req: Request, res: Response) => {
   if (!JWT_SECRET) {
@@ -36,9 +37,11 @@ const authenticateAdmin = async (req: Request, res: Response) => {
   }
 
   try {
-    const admin = await adminModel
-      .findById(subject)
-      .select("_id username superAdmin");
+    const admins = await queryRows<AdminRow>(
+      `SELECT ${adminFields} FROM admins WHERE id = ? LIMIT 1`,
+      [subject],
+    );
+    const admin = admins[0];
     if (!admin) {
       res.status(401).json({ error: "Admin account no longer exists." });
       return null;
@@ -60,9 +63,9 @@ export const requireAdmin = async (
   if (!admin) return;
 
   res.locals.admin = {
-    _id: admin.id,
+    _id: admin._id,
     username: admin.username,
-    superAdmin: admin.superAdmin,
+    superAdmin: Boolean(admin.superAdmin),
   };
   return next();
 };
@@ -74,7 +77,7 @@ export const requireSuperAdmin = async (
 ) => {
   const admin = await authenticateAdmin(req, res);
   if (!admin) return;
-  if (!admin.superAdmin) {
+  if (!Boolean(admin.superAdmin)) {
     return res.status(403).json({ error: "Super-admin access is required." });
   }
 
