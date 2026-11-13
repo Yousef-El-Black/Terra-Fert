@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const socialmedia_controller_1 = require("../../controllers/socialmedia.controller");
+const adminAuth_1 = require("../../middleware/adminAuth");
+const socialMediaRoutes = (0, express_1.Router)();
+socialMediaRoutes.get("/", socialmedia_controller_1.getActiveSocialMedia);
+socialMediaRoutes.use(adminAuth_1.requireSuperAdmin);
+socialMediaRoutes.get("/manage", socialmedia_controller_1.getAllSocialMedia);
+socialMediaRoutes.post("/", socialmedia_controller_1.createSocialMedia);
+socialMediaRoutes.put("/:id", socialmedia_controller_1.updateSocialMedia);
+socialMediaRoutes.delete("/:id", socialmedia_controller_1.deleteSocialMedia);
+exports.default = socialMediaRoutes;
