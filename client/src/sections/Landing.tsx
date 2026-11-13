@@ -20,7 +20,11 @@ const Landing = () => {
             طلبك مباشرة إلى واتساب.
           </p>
           <div className="btns flex gap-5 py-5">
-            <PrimaryBtn text="تصفح المنتجات" link="/products" />
+            <PrimaryBtn
+              text="تصفح المنتجات"
+              link="/shop
+            "
+            />
             <WhatsappBtn
               text="اطلب عبر الواتساب"
               link={whatsappLink}

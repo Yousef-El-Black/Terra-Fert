@@ -205,7 +205,10 @@ The server package currently has no automated test suite configured; its
 ## Deployment notes
 
 - Build the client with `npm run build` in `client` and serve the generated
-  `client/dist` directory from a static host.
+  `client/dist` directory from a static host. The client includes an Apache
+  rewrite rule in `client/public/.htaccess` so direct visits and page refreshes
+  on React Router routes serve `index.html`; make sure the host supports
+  `.htaccess` and that the file is included when deploying `client/dist`.
 - Build and run the API from `server`; provide the MySQL connection variables
   and `JWT_SECRET` through the deployment platform's secret/configuration
   manager.
