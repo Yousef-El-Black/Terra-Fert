@@ -1,6 +1,7 @@
 import UploadIcon from "@mui/icons-material/Upload";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import LabIcon from "@mui/icons-material/AnalyticsOutlined";
 import PreviewIcon from "@mui/icons-material/RemoveRedEye";
 import axios from "axios";
@@ -11,6 +12,7 @@ import { getAdminAuthConfig } from "../utils/adminAuth";
 type Product = { _id: string | number; title: string };
 
 const AddTest = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const serverUrl = import.meta.env.REACT_APP_SERVER_URL;
   const [title, setTitle] = useState<string>("");
@@ -116,7 +118,7 @@ const AddTest = () => {
           );
         })
         .then(() => {
-          document.location.assign("/admin/tests");
+          navigate("/admin/tests");
         })
         .catch((err) => {
           console.error("Failed to create test:", err.response?.data ?? err);

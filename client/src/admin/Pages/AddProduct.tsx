@@ -1,6 +1,7 @@
 import UploadIcon from "@mui/icons-material/Upload";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AvailableBadge } from "../../components/Badges";
 import { AddToCartBtn, WhatsappOrderBtn } from "../../components/Btns";
 import ChatIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
@@ -13,6 +14,7 @@ import { useWhatsAppSettings } from "../../components/useWhatsAppSettings";
 import { getAdminAuthConfig } from "../utils/adminAuth";
 
 const AddProduct = () => {
+  const navigate = useNavigate();
   const { whatsappLink } = useWhatsAppSettings();
   const dispatch = useDispatch();
   const serverUrl = import.meta.env.REACT_APP_SERVER_URL;
@@ -101,7 +103,7 @@ const AddProduct = () => {
           );
         })
         .then(() => {
-          document.location.assign("/admin/products");
+          navigate("/admin/products");
         })
         .catch((err) => {
           console.error("Failed to create product:", err.response?.data ?? err);

@@ -7,7 +7,7 @@ const Header = () => {
   const logout = () => {
     localStorage.removeItem("adminToken");
     sessionStorage.removeItem("adminToken");
-    navigate("/admin/");
+    navigate("/");
   };
 
   return (

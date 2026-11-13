@@ -5,7 +5,7 @@ import UploadIcon from "@mui/icons-material/Upload";
 import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { addMsg } from "../../redux/slices/msgSlice";
 import { getAdminAuthConfig } from "../utils/adminAuth";
 
@@ -19,6 +19,7 @@ type Test = {
 };
 
 const EditTest = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { id } = useParams<{ id: string }>();
   const serverUrl = import.meta.env.REACT_APP_SERVER_URL;
@@ -120,7 +121,7 @@ const EditTest = () => {
           type: "success",
         }),
       );
-      document.location.assign("/admin/tests/");
+      navigate("/admin/tests");
     } catch (error) {
       console.error("Failed to update test:", error);
       showError("تعذر حفظ تعديلات التجربة");
